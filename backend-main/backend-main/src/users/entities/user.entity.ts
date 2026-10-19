@@ -1,5 +1,7 @@
 import { Embedded, Entity, PrimaryKey, Property } from '@mikro-orm/core';
 import {
+  IsBoolean,
+  IsEnum,
   IsOptional,
   IsString,
   IsUUID,
@@ -12,6 +14,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { IUser } from '../interfaces/user.interface';
 import { BCRYPT_HASH } from '../../common/consts/regex.const';
 import { CredentialsEmbeddable } from '../embeddables/credentials.embeddable';
+import { UserRole } from '../enums/user-role.enum';
 
 @ObjectType()
 @Entity({ tableName: 'users' })
@@ -37,6 +40,16 @@ export class UserEntity implements IUser {
   @IsString()
   @MaxLength(250)
   public picture?: string;
+
+  @Field(() => UserRole)
+  @Property({ columnType: 'varchar', length: 16, default: UserRole.USER })
+  @IsEnum(UserRole)
+  public role: UserRole = UserRole.USER;
+
+  @Field(() => Boolean)
+  @Property({ default: false })
+  @IsBoolean()
+  public isBlocked: boolean = false;
 
   @Embedded(() => CredentialsEmbeddable)
   public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();

@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -13,6 +14,7 @@ import { hash } from 'bcrypt';
 import { v4 } from 'uuid';
 
 import { UserEntity } from './entities/user.entity';
+import { UserRole } from './enums/user-role.enum';
 
 import { CommonService } from '../common/common.service';
 import { isNull, isUndefined } from '../common/utils/validation.util';
@@ -46,7 +48,8 @@ export class UsersService {
     const user = this.usersRepository.create({
       id: v4(),
       username,
-      password: await hash(password, 10)
+      password: await hash(password, 10),
+      role: UserRole.USER
     });
 
     await this.commonService.saveEntity(this.usersRepository, user, true);
@@ -60,9 +63,37 @@ export class UsersService {
     return user;
   }
 
+  public async findActiveById(id: string): Promise<UserEntity> {
+    const user = await this.findOneById(id);
+    this.throwIfBlocked(user);
+
+    return user;
+  }
+
+  public async getAllUsers(): Promise<UserEntity[]> {
+    return this.usersRepository.findAll();
+  }
+
+  public async blockUser(id: string): Promise<UserEntity> {
+    const user = await this.findUserForModeration(id);
+    user.isBlocked = true;
+    await this.usersRepository.getEntityManager().flush();
+
+    return user;
+  }
+
+  public async unblockUser(id: string): Promise<UserEntity> {
+    const user = await this.findUserForModeration(id);
+    user.isBlocked = false;
+    await this.usersRepository.getEntityManager().flush();
+
+    return user;
+  }
+
   public async findOneByUsername(username: string): Promise<UserEntity> {
     const user = await this.usersRepository.findOne({ username });
     this.throwUnauthorizedException(user);
+    this.throwIfBlocked(user);
 
     return user;
   }
@@ -77,6 +108,8 @@ export class UsersService {
     if (user.credentials.version !== version) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    this.throwIfBlocked(user);
 
     return user;
   }
@@ -114,6 +147,22 @@ export class UsersService {
     await this.commonService.saveEntity(this.usersRepository, user);
 
     return user;
+  }
+
+  private async findUserForModeration(id: string): Promise<UserEntity> {
+    const user = await this.usersRepository.findOne({ id });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  private throwIfBlocked(user: UserEntity): void {
+    if (user.isBlocked) {
+      throw new UnauthorizedException('User is blocked');
+    }
   }
 
   private throwUnauthorizedException(
