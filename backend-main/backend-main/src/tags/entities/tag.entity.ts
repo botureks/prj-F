@@ -6,7 +6,6 @@ import {
   Property
 } from '@mikro-orm/core';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
 import { ITag } from '../interfaces/tag.interface';
@@ -18,36 +17,34 @@ export class TagEntity implements ITag {
   @Field(() => ID)
   @PrimaryKey()
   @IsUUID()
-  id: string;
+  public id: string;
 
   @Field(() => String)
   @Property({ unique: true })
   @IsNotEmpty()
   @IsString()
-  name: string;
+  public name: string;
 
   @Field(() => String)
   @Property({ unique: true })
   @IsNotEmpty()
   @IsString()
-  slug: string;
+  public slug: string;
 
   @Field(() => String, { nullable: true })
   @Property({ nullable: true })
   @IsString()
-  color?: string;
+  public color?: string;
 
   @Field(() => [PostEntity])
-  @ManyToMany(() => PostEntity, post => post.tags, {
-    mappedBy: 'tags'
-  })
-  posts = new Collection<PostEntity>(this);
+  @ManyToMany(() => PostEntity, post => post.tags)
+  public posts = new Collection<PostEntity>(this);
 
   @Field()
   @Property({ onCreate: () => new Date() })
-  createdAt: Date = new Date();
+  public createdAt: Date = new Date();
 
   @Field()
   @Property({ onUpdate: () => new Date() })
-  updatedAt: Date = new Date();
+  public updatedAt: Date = new Date();
 }
