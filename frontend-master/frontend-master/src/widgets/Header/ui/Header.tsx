@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
+import { useRouter } from "next/router";
 
 import { classNames } from "src/shared/lib/classNames";
 
@@ -19,6 +20,7 @@ import { useTheme } from "src/shared/lib/hooks/useTheme";
 import { useLogout } from "src/shared/lib/hooks/useLogout";
 
 import { getAuth } from "src/entities/Auth/model/selectors/getAuth";
+import { UserRole } from "src/entities/User/model/types/user";
 
 import { WriteIcon } from "src/shared/ui/Icons/WriteIcon";
 
@@ -35,6 +37,7 @@ import cls from "./Header.module.less";
 
 export const Header = () => {
     const { isFixed } = useHeaderFixed();
+    const router = useRouter();
 
     const {
         theme,
@@ -95,6 +98,12 @@ export const Header = () => {
                                             selected={ theme === Theme.LIGHT }
                                             onValueChange={toggleTheme}
                                         />
+                                        {auth.user.role === UserRole.ADMIN && (
+                                            <ListboxItem
+                                                title="Администрирование"
+                                                onClick={() => router.push("/admin")}
+                                            />
+                                        )}
                                         <ListboxItem
                                             title="Выйти из аккаунта"
                                             onClick={logout}
