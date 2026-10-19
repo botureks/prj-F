@@ -43,8 +43,11 @@ export class PostsResolver {
   }
 
   @Mutation(() => Boolean)
-  async deletePost(@Args('id') id: string): Promise<boolean> {
-    await this.postsService.deletePost(id);
+  async deletePost(
+    @Args('id') id: string,
+    @CurrentUser() userId: string
+  ): Promise<boolean> {
+    await this.postsService.deletePost(id, userId);
     return true;
   }
 }

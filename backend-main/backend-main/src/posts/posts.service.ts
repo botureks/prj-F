@@ -16,6 +16,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { PostEntity } from './entities/post.entity';
 import { UserEntity } from '../users/entities/user.entity';
 import { TagEntity } from '../tags/entities/tag.entity';
+import { UserRole } from '../users/enums/user-role.enum';
 
 import { CommonService } from '../common/common.service';
 
@@ -108,11 +109,21 @@ export class PostsService {
     return post;
   }
 
-  public async deletePost(id: string): Promise<void> {
-    const post = await this.postRepository.findOne({ id });
+  public async deletePost(id: string, userId: string): Promise<void> {
+    const post = await this.postRepository.findOne(id, {
+      populate: ['author']
+    });
 
     if (!post) {
       return;
+    }
+
+    if (post.author.id !== userId) {
+      const user = await this.userRepository.findOne(userId);
+
+      if (!user || user.role !== UserRole.ADMIN) {
+        throw new ForbiddenException();
+      }
     }
 
     await this.postRepository.getEntityManager().removeAndFlush(post);

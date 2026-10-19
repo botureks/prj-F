@@ -11,6 +11,7 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
 import { UserEntity } from '../users/entities/user.entity';
+import { UserRole } from '../users/enums/user-role.enum';
 
 import { IComment } from './interfaces/comment.interface';
 
@@ -66,13 +67,24 @@ export class CommentsService {
     return comment;
   }
 
-  async deleteComment(id: string): Promise<void> {
-    const comment = await this.commentRepository.findOne({ id });
+  async deleteComment(id: string, userId: string): Promise<void> {
+    const comment = await this.commentRepository.findOne(id, {
+      populate: ['author']
+    });
+
     if (!comment) {
       return;
     }
 
-    await this.commentRepository.getEntityManager().remove(comment).flush();
+    if (comment.author.id !== userId) {
+      const user = await this.userRepository.findOne(userId);
+
+      if (!user || user.role !== UserRole.ADMIN) {
+        throw new ForbiddenException();
+      }
+    }
+
+    await this.commentRepository.getEntityManager().removeAndFlush(comment);
   }
 
   async getCommentById(id: string): Promise<IComment | null> {

@@ -51,8 +51,11 @@ export class CommentsResolver {
   }
 
   @Mutation(() => Boolean)
-  async deleteComment(@Args('id') id: string): Promise<boolean> {
-    await this.commentsService.deleteComment(id);
+  async deleteComment(
+    @Args('id') id: string,
+    @CurrentUser() userId: string
+  ): Promise<boolean> {
+    await this.commentsService.deleteComment(id, userId);
     return true;
   }
 }
