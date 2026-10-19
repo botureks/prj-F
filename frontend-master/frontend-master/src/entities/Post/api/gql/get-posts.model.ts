@@ -1,11 +1,14 @@
-import { gql } from "src/shared/api/generated";
+import { gql } from "@apollo/client";
 
-const GET_POSTS = gql(`
+import POST_MODEL from "./fragments/post.fragment";
+
+const GET_POSTS = gql`
+    ${POST_MODEL}
     query Posts {
         posts {
             ...PostModel
         }
     }
-`);
+`;
 
 export default GET_POSTS;

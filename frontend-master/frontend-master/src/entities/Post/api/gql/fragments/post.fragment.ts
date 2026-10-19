@@ -1,6 +1,6 @@
-import { gql } from "src/shared/api/generated";
+import { gql } from "@apollo/client";
 
-const POST_MODEL = gql(`
+const POST_MODEL = gql`
     fragment PostModel on PostEntity {
         id
         title
@@ -11,9 +11,19 @@ const POST_MODEL = gql(`
         editedAt
         isEdited
         author {
-            ...UserModel
+            id
+            username
+            picture
+        }
+        tags {
+            id
+            name
+            slug
+            color
+            createdAt
+            updatedAt
         }
     }
-`)
+`;
 
 export default POST_MODEL;
