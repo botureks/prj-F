@@ -1,4 +1,10 @@
-import { Entity, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToMany,
+  PrimaryKey,
+  Property
+} from '@mikro-orm/core';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
@@ -32,8 +38,10 @@ export class TagEntity implements ITag {
   color?: string;
 
   @Field(() => [PostEntity])
-  @ManyToMany(() => PostEntity, post => post.tags)
-  posts: PostEntity[];
+  @ManyToMany(() => PostEntity, post => post.tags, {
+    mappedBy: 'tags'
+  })
+  posts = new Collection<PostEntity>(this);
 
   @Field()
   @Property({ onCreate: () => new Date() })
