@@ -1,9 +1,7 @@
 import { useQuery } from "@apollo/client";
 
 import { LoaderIcon } from "src/shared/ui/Icons/LoaderIcon";
-
 import { PostCard } from "src/entities/Post/ui/PostCard";
-
 import GET_POSTS from "src/entities/Post/api/gql/get-posts.model";
 
 import cls from "./PostsList.module.less";
@@ -12,11 +10,11 @@ export const PostsList = () => {
     const { data, loading, error } = useQuery(GET_POSTS);
 
     if (loading) {
-        return <LoaderIcon/>
+        return <LoaderIcon />;
     }
 
     if (error) {
-        return <a>{ error.message }</a>;
+        return <a>{error.message}</a>;
     }
 
     if (!data?.posts) {
@@ -25,9 +23,9 @@ export const PostsList = () => {
 
     return (
         <div className={cls.PostsList}>
-            {data.posts.map((post, index) => (
-                <PostCard {...post}/>
+            {data.posts.map((post) => (
+                <PostCard key={post.id} {...post} />
             ))}
         </div>
-    )
-}
+    );
+};

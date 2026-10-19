@@ -2,29 +2,26 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 
 import { Post } from "src/entities/Post/ui/Post";
-import { PostEntity } from "src/shared/api/generated/graphql";
+import { PostModel } from "src/entities/Post/model/types/post";
+import { TagBadge } from "src/entities/Tag/ui/TagBadge";
 
 import { Border } from "src/shared/ui/Border";
 
 import { CommentArea } from "src/features/sendComment/ui/CommentArea";
 import { CommentsSection } from "src/entities/Comment/ui/CommentsSection";
-
 import { EditorModal } from "src/features/createPost/ui/EditorModal";
 
 import { getAuth } from "src/entities/Auth/model/selectors/getAuth/getAuth";
+import { PostUserMetadata } from "src/entities/Post/ui/PostUserMetadata/PostUserMetadata";
 
 import cls from "./PostLayout.module.less";
-import { PostUserMetadata } from "../../../entities/Post/ui/PostUserMetadata/PostUserMetadata";
 
 interface PostLayoutProps {
-    post: PostEntity;
+    post: PostModel;
 }
 
-export const PostLayout = (props: PostLayoutProps) => {
-    const { post } = props;
-
+export const PostLayout = ({ post }: PostLayoutProps) => {
     const auth = useSelector(getAuth);
-
     const [isEditModalOpen, setEditModalOpen] = useState(false);
 
     const isAuthor = auth.user?.id === post.author.id;
@@ -38,12 +35,19 @@ export const PostLayout = (props: PostLayoutProps) => {
                     createdAt={post.createdAt}
                 />
 
+                {post.tags.length > 0 && (
+                    <div className={cls.PostLayoutTags}>
+                        {post.tags.map((tag) => (
+                            <TagBadge key={tag.id} tag={tag} />
+                        ))}
+                    </div>
+                )}
+
                 {isAuthor && (
                     <button
-                        onClick={() => {
-                            console.log("EDIT POST:", post);
-                            setEditModalOpen(true);
-                        }}
+                        className={cls.PostLayoutEditButton}
+                        type="button"
+                        onClick={() => setEditModalOpen(true)}
                     >
                         Редактировать
                     </button>
@@ -61,7 +65,6 @@ export const PostLayout = (props: PostLayoutProps) => {
                     </a>
 
                     <CommentArea postId={post.id} />
-
                     <CommentsSection postId={post.id} />
                 </div>
             </div>
