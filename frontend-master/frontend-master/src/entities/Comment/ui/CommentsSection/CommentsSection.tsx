@@ -14,18 +14,18 @@ interface CommentsSectionProps {
 export const CommentsSection = (props: CommentsSectionProps) => {
     const { postId } = props;
 
-    const { data, loading, error } = useQuery(COMMENTS, {
+    const { data, loading, error, refetch } = useQuery(COMMENTS, {
         variables: {
             postId
         }
     });
 
     if (loading) {
-        return <LoaderIcon/>;
+        return <LoaderIcon />;
     }
 
     if (error) {
-        return <a>{ error.message }</a>;
+        return <a>{error.message}</a>;
     }
 
     if (!data?.comments) {
@@ -33,18 +33,22 @@ export const CommentsSection = (props: CommentsSectionProps) => {
     }
 
     return (
-        <div className={ cls.CommentsSection }>
+        <div className={cls.CommentsSection}>
             {
                 data.comments.length > 0 ? (
-                    data.comments.map((data, index) => (
-                        <CommentBase comment={ data } key={ index }/>
+                    data.comments.map((comment, index) => (
+                        <CommentBase
+                            comment={comment}
+                            key={index}
+                            refetchComments={refetch}
+                        />
                     ))
                 ) : (
-                    <a className={ cls.NoComments }>
+                    <a className={cls.NoComments}>
                         Ответов еще нет, станьте первым
                     </a>
                 )
             }
         </div>
-    )
-}
+    );
+};
