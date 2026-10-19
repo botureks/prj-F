@@ -102,11 +102,15 @@ export class JwtService {
       case TokenTypeEnum.ACCESS:
         const { privateKey, time: accessTime } = this.jwtConfig.access;
         return this.commonService.throwInternalError(
-          JwtService.generateTokenAsync({ id: user.id }, privateKey, {
-            ...jwtOptions,
-            expiresIn: accessTime,
-            algorithm: 'RS256'
-          })
+          JwtService.generateTokenAsync(
+            { id: user.id, role: user.role },
+            privateKey,
+            {
+              ...jwtOptions,
+              expiresIn: accessTime,
+              algorithm: 'RS256'
+            }
+          )
         );
       case TokenTypeEnum.REFRESH:
         const { secret: refreshSecret, time: refreshTime } =
