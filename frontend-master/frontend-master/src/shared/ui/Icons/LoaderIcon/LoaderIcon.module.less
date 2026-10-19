@@ -1,0 +1,32 @@
+.LoaderIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+
+  animation: spinner .8s ease infinite;
+}
+
+.LoaderIcon circle:first-child {
+  stroke: var(--spinner-circle);
+}
+
+.LoaderIcon circle:last-child {
+  stroke: var(--spinner);
+}
+
+.light circle:first-child {
+  stroke: #e3e3e3;
+}
+
+.light circle:last-child {
+  stroke: #737373;
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(1turn);
+  }
+}

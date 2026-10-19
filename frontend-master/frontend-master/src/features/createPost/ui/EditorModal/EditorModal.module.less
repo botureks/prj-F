@@ -1,0 +1,110 @@
+.EditorModal {
+  div[class=ce-block__content] {
+    color: var(--primary_color);
+  }
+
+  div[class=cdx-search-field__icon] {
+    svg > * {
+      fill: transparent;
+      stroke: var(--secondary_color);
+    };
+  }
+
+  div[class='ce-popover ce-popover--opened'] {
+    --color-background: #d3d3d3;
+  }
+
+  div[class='ce-toolbar__plus'] {
+    background: var(--secondary_color);
+    border: var(--secondary_color);
+
+    svg > * {
+      stroke: var(--primary_color);
+    }
+  }
+
+  div[class='ce-toolbar__plus']:hover {
+    background: var(--primary_color);
+
+    svg > * {
+      stroke: var(--secondary_color);
+    }
+  }
+
+  span[class='ce-toolbar__settings-btn'] {
+    background: var(--secondary_color);
+    border: var(--secondary_color);
+
+    svg > * {
+      stroke: var(--primary_color);
+    }
+  }
+
+  span[class='ce-toolbar__settings-btn']:hover {
+    background: var(--primary_color);
+
+    svg > * {
+      stroke: var(--secondary_color);
+    }
+  }
+
+  h2[class=ce-header][contentEditable=true][data-placeholder]:before {
+    font-family: "SF Pro Display";
+    font-weight: 600;
+
+    color: #969da0;
+  }
+
+  h2[class=ce-header][contentEditable=true][data-placeholder]:empty:focus:before {
+    display: block;
+    opacity: .5;
+  }
+
+  div[class=ce-block__content] > div::selection {
+    background: var(--primary_color);
+    color: var(--secondary_color);
+  }
+
+  div[class=codex-editor__redactor] > *::selection {
+    background: var(--primary_color);
+    color: var(--secondary_color);
+  }
+
+  div[id^=react-editor-js-] {
+    height: 90%;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  div[id^=react-editor-js-]::-webkit-scrollbar {
+    width: 8px;
+    height: 15px;
+
+    border-radius: 12px;
+  }
+
+  div[id^=react-editor-js-]::-webkit-scrollbar-track-piece  {
+    background-color: #131313;
+  }
+
+  div[id^=react-editor-js-]::-webkit-scrollbar-thumb:vertical {
+    height: 30px;
+    background-color: #313131;
+
+    border-radius: 12px;
+  }
+}
+
+.EditorModalContent {
+  height: 80vh;
+
+  div[id="content"] {
+    max-width: 620px;
+  }
+}
+
+.EditorPublishBtn {
+  width: min-content;
+  margin-left: 16px;
+}

@@ -1,0 +1,122 @@
+services:
+
+  # ── PostgreSQL ───────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-forum}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-UDHIiIyyHakKuZ2BF0DY43lmcByUhDY2}
+      POSTGRES_DB: ${POSTGRES_DB:-forum}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-forum}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── MinIO (S3-совместимое хранилище) ─────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-YaMaTic09nk7VQAvmMOeQu1WAS5FN1UT}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── MinIO bucket init ────────────────────────────────────────────────────────
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-YaMaTic09nk7VQAvmMOeQu1WAS5FN1UT} &&
+      mc mb --ignore-existing local/avatars &&
+      mc anonymous set download local/avatars
+      "
+    restart: on-failure
+
+  # ── Backend (NestJS + Fastify + GraphQL) ─────────────────────────────────────
+  backend:
+    build:
+      context: ./backend-main/backend-main
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      APP_ID: ${APP_ID:-forum-app}
+      DOMAIN: ${DOMAIN:-localhost}
+      PORT: ${PORT:-3001}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-forum}:${POSTGRES_PASSWORD:-UDHIiIyyHakKuZ2BF0DY43lmcByUhDY2}@postgres:5432/${POSTGRES_DB:-forum}
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_TIME: ${JWT_ACCESS_TIME:-900}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-EQu3oKwwtr4xX9QOET6dXOXI6GDb3RPo9yA2pqEXywtz4tBQ}
+      JWT_REFRESH_TIME: ${JWT_REFRESH_TIME:-604800}
+      REFRESH_COOKIE: ${REFRESH_COOKIE:-refreshToken}
+      COOKIE_SECRET: ${COOKIE_SECRET:-H7DbWLlH6jQ0TQ7DE2RIIZPJQgeXZ5neItRpLWzEUxzg6NMx}
+      UPLOAD_MAX_FILE_SIZE: ${UPLOAD_MAX_FILE_SIZE:-52428800}
+      UPLOAD_MAX_FILES: ${UPLOAD_MAX_FILES:-10}
+      STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-YaMaTic09nk7VQAvmMOeQu1WAS5FN1UT}
+      STORAGE_ENDPOINT: http://minio:9000
+      STORAGE_PUBLIC_ENDPOINT: ${STORAGE_PUBLIC_ENDPOINT:-http://localhost:9000}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    volumes:
+      - backend_keys:/app/keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+
+  # ── Frontend (Next.js) ───────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend-master/frontend-master
+      dockerfile: Dockerfile
+      args:
+        GRAPHQL_URL: ${GRAPHQL_URL:-http://localhost:3001/api/graphql}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      GRAPHQL_URL: ${GRAPHQL_URL:-http://localhost:3001/api/graphql}
+      INTERNAL_GRAPHQL_URL: http://backend:3001/api/graphql
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  backend_keys:

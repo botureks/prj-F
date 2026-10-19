@@ -1,0 +1,113 @@
+@import "themes/normal";
+@import "themes/dark";
+@import "vars";
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-weight: 400;
+  src: url('/fonts/SFProDisplay-Regular.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-weight: 600;
+  src: url('/fonts/SFProDisplay-Semibold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  font-weight: 700;
+  src: url('/fonts/SFProDisplay-Bold.woff') format('woff');
+}
+
+body {
+  box-sizing: border-box;
+  font-family: "SF Pro Display";
+
+  background: var(--secondary_color) !important;
+  color: var(--primary_color) !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 15px;
+
+  border-radius: 12px;
+}
+
+::-webkit-scrollbar-track-piece  {
+  background-color: #131313;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  height: 30px;
+  background-color: #313131;
+
+  border-radius: 12px;
+}
+
+input,
+button,
+textarea,
+select {
+  margin: 0;
+  font: inherit;
+}
+
+* {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  margin: 0;
+  padding: 0;
+}
+
+*, :after, :before {
+  box-sizing: border-box;
+}
+
+:focus {
+  outline: none
+}
+
+:active,:hover {
+  outline: 0
+}
+
+#__next {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(1vh * 100);
+}
+
+a:-webkit-any-link {
+  text-decoration: none;
+}
+
+a:hover -webkit-any-link {
+  text-decoration: none;
+}
+
+.container {
+  margin: 0 auto;
+
+  width: 100%;
+  max-width: 96%;
+
+  @media(min-width: 520px) and (max-width: 1023px) {
+    padding: 0 16px;
+    max-width: 560px;
+  }
+
+  @media(min-width: 1024px) {
+    padding: 0 24px;
+    max-width: 720px;
+  }
+}
+
+.delimiter:before {
+  display: inline-block;
+  content: "***";
+  font-size: 30px;
+  line-height: 65px;
+  height: 30px;
+  letter-spacing: .2em;
+}

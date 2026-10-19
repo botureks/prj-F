@@ -1,0 +1,8 @@
+dist/
+keys/
+node_modules/
+bun.lockb
+dump.rdb
+schema.gql
+forum
+.env
