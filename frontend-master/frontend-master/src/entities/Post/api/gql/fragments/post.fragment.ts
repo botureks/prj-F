@@ -8,6 +8,8 @@ const POST_MODEL = gql(`
         content
         createdAt
         updatedAt
+        editedAt
+        isEdited
         author {
             ...UserModel
         }

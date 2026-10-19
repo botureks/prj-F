@@ -9,6 +9,8 @@ const COMMENT_MODEL = gql(`
             views
             createdAt
             updatedAt
+            editedAt
+            isEdited
             author {
                 id
                 username
