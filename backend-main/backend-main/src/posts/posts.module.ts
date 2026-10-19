@@ -5,9 +5,10 @@ import { PostEntity } from './entities/post.entity';
 import { PostsService } from './posts.service';
 import { PostsResolver } from './posts.resolver';
 import { UserEntity } from '../users/entities/user.entity';
+import { TagEntity } from '../tags/entities/tag.entity';
 
 @Module({
-  imports: [MikroOrmModule.forFeature([PostEntity, UserEntity])],
+  imports: [MikroOrmModule.forFeature([PostEntity, UserEntity, TagEntity])],
   providers: [PostsService, PostsResolver],
   exports: [PostsService]
 })

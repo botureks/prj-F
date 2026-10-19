@@ -1,9 +1,17 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryKey,
+  Property
+} from '@mikro-orm/core';
 import { IsString, IsUUID, Length } from 'class-validator';
 
 import { IPost } from '../interfaces/post.interface';
 import { UserEntity } from '../../users/entities/user.entity';
+import { TagEntity } from '../../tags/entities/tag.entity';
 
 @ObjectType()
 @Entity({ tableName: 'posts' })
@@ -32,6 +40,10 @@ export class PostEntity implements IPost {
   @Property({ columnType: 'text' })
   @IsString()
   public content: string;
+
+  @Field(() => [TagEntity])
+  @ManyToMany(() => TagEntity)
+  public tags = new Collection<TagEntity>(this);
 
   @Field()
   @Property({ onCreate: () => new Date() })
