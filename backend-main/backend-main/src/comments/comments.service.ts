@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -44,11 +44,22 @@ export class CommentsService {
 
   async updateComment(
     id: string,
+    userId: string,
     updateCommentDto: UpdateCommentDto
   ): Promise<IComment> {
     const comment = await this.commentRepository.findOne(id);
 
+    // @ts-ignore
+    await this.commentRepository.populate(comment, ['author']);
+
+    if (comment.author.id !== userId) {
+      throw new ForbiddenException();
+    }
+
     this.commentRepository.assign(comment, updateCommentDto);
+
+    comment.editedAt = new Date();
+    comment.isEdited = true;
 
     await this.commentRepository.getEntityManager().flush();
 
@@ -56,7 +67,7 @@ export class CommentsService {
   }
 
   async deleteComment(id: string): Promise<void> {
-    const comment = this.commentRepository.findOne({ id });
+    const comment = await this.commentRepository.findOne({ id });
     if (!comment) {
       return;
     }

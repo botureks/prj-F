@@ -45,9 +45,9 @@ export class CommentsResolver {
   @Mutation(() => CommentEntity)
   async updateComment(
     @Args('id') id: string,
-    @Args('updateCommentInput') updateCommentInput: UpdateCommentInput
+    @Args('updateCommentInput') updateCommentInput: UpdateCommentInput, @CurrentUser() userId: string
   ): Promise<IComment> {
-    return this.commentsService.updateComment(id, updateCommentInput);
+    return this.commentsService.updateComment(id, userId, updateCommentInput);
   }
 
   @Mutation(() => Boolean)
