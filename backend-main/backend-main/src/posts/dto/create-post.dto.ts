@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -13,4 +13,9 @@ export class CreatePostDto {
   @IsNotEmpty()
   @IsString()
   content: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  tagIds?: string[];
 }

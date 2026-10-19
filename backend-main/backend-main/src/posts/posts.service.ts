@@ -10,6 +10,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 
 import { PostEntity } from './entities/post.entity';
 import { UserEntity } from '../users/entities/user.entity';
+import { TagEntity } from '../tags/entities/tag.entity';
+
 import { CommonService } from '../common/common.service';
 
 @Injectable()
@@ -17,8 +19,13 @@ export class PostsService {
   constructor(
     @InjectRepository(PostEntity)
     private postRepository: EntityRepository<PostEntity>,
+
     @InjectRepository(UserEntity)
     private userRepository: EntityRepository<UserEntity>,
+
+    @InjectRepository(TagEntity)
+    private tagRepository: EntityRepository<TagEntity>,
+
     private readonly commonService: CommonService
   ) {}
 
@@ -27,13 +34,24 @@ export class PostsService {
     createPostDto: CreatePostDto
   ): Promise<PostEntity> {
     const user = await this.userRepository.findOne(userId);
+
+    const tags = createPostDto.tagIds
+      ? await this.tagRepository.find({
+          id: { $in: createPostDto.tagIds }
+        })
+      : [];
+
     const post = this.postRepository.create({
-      ...createPostDto,
+      title: createPostDto.title,
+      topic: createPostDto.topic,
+      content: createPostDto.content,
       id: v4(),
-      author: user
+      author: user,
+      tags
     });
 
     await this.commonService.saveEntity(this.postRepository, post, true);
+
     return post;
   }
 
@@ -63,6 +81,7 @@ export class PostsService {
 
   async deletePost(id: string): Promise<void> {
     const post = await this.postRepository.findOne({ id });
+
     if (!post) {
       return;
     }
@@ -73,7 +92,9 @@ export class PostsService {
   async getPostById(id: string): Promise<PostEntity | null> {
     const post = await this.postRepository.findOne(id);
 
-    if (!post) return null;
+    if (!post) {
+      return null;
+    }
 
     // @ts-ignore
     await this.postRepository.populate(post, ['author.username']);
