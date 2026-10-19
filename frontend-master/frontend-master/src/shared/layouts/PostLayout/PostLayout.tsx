@@ -40,7 +40,10 @@ export const PostLayout = (props: PostLayoutProps) => {
 
                 {isAuthor && (
                     <button
-                        onClick={() => setEditModalOpen(true)}
+                        onClick={() => {
+                            console.log("EDIT POST:", post);
+                            setEditModalOpen(true);
+                        }}
                     >
                         Редактировать
                     </button>
