@@ -8,6 +8,8 @@ import { CreateTagInput } from './dto/create-tag.input';
 import { UpdateTagInput } from './dto/update-tag.input';
 
 import { ITag } from './interfaces/tag.interface';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/enums/user-role.enum';
 
 @Resolver(() => TagEntity)
 export class TagsResolver {
@@ -25,6 +27,7 @@ export class TagsResolver {
     return this.tagsService.getTagById(id);
   }
 
+  @Roles(UserRole.ADMIN)
   @Mutation(() => TagEntity)
   public async createTag(
     @Args('createTagInput') createTagInput: CreateTagInput
@@ -32,6 +35,7 @@ export class TagsResolver {
     return this.tagsService.createTag(createTagInput);
   }
 
+  @Roles(UserRole.ADMIN)
   @Mutation(() => TagEntity)
   public async updateTag(
     @Args('id') id: string,
@@ -40,6 +44,7 @@ export class TagsResolver {
     return this.tagsService.updateTag(id, updateTagInput);
   }
 
+  @Roles(UserRole.ADMIN)
   @Mutation(() => Boolean)
   public async deleteTag(
     @Args('id') id: string
