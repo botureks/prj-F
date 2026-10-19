@@ -3,19 +3,15 @@ import { GqlOptionsFactory } from '@nestjs/graphql';
 import { MercuriusDriverConfig } from '@nestjs/mercurius';
 
 @Injectable()
-export class GqlConfigService
-  implements GqlOptionsFactory<MercuriusDriverConfig>
-{
+export class GqlConfigService implements GqlOptionsFactory<MercuriusDriverConfig> {
   public createGqlOptions(): MercuriusDriverConfig {
-    // @ts-ignore
     return {
-      graphiql: false,
-      ide: false,
+      graphiql: true,
+      ide: true,
       path: '/api/graphql',
       routes: true,
       autoSchemaFile: './schema.gql',
-      // @ts-ignore
-      context: ({ request, reply }) => ({ request, reply })
+      context: (ctx: any) => ({ request: ctx.request }),
     };
   }
 }
