@@ -9,8 +9,11 @@ import { Button } from "src/shared/ui/Button";
 import { Textarea } from "src/shared/ui/Textarea";
 
 import UPDATE_COMMENT from "src/entities/Comment/api/gql/update-comment.model";
+import DELETE_COMMENT from "src/entities/Comment/api/gql/delete-comment.module";
 
 import { getAuth } from "src/entities/Auth/model/selectors/getAuth/getAuth";
+import { UserRole } from "src/entities/User/model/types/user";
+import { useToast } from "src/shared/lib/hooks/useToast";
 
 import cls from "./CommentBase.module.less";
 
@@ -29,6 +32,7 @@ export const CommentBase = (props: CommentBaseProps) => {
 
 
     const auth = useSelector(getAuth);
+    const toast = useToast();
 
 
     const [isEditMode, setIsEditMode] = useState(false);
@@ -41,9 +45,12 @@ export const CommentBase = (props: CommentBaseProps) => {
     const [updateComment, { loading }] = useMutation(
         UPDATE_COMMENT
     );
+    const [deleteComment, { loading: isDeleting }] = useMutation(DELETE_COMMENT);
 
 
     const isAuthor = auth.user?.id === comment.author.id;
+    const isAdmin = auth.user?.role === UserRole.ADMIN;
+    const canDelete = isAuthor || isAdmin;
 
 
     const updateText = (
@@ -88,6 +95,21 @@ export const CommentBase = (props: CommentBaseProps) => {
         );
 
         setIsEditMode(false);
+    };
+
+
+    const removeComment = async () => {
+        if (!window.confirm("Удалить комментарий?")) {
+            return;
+        }
+
+        try {
+            await deleteComment({ variables: { id: comment.id } });
+            await refetchComments();
+            toast.success({ message: "Комментарий удалён" });
+        } catch {
+            toast.error({ message: "Не удалось удалить комментарий" });
+        }
     };
 
 
@@ -144,6 +166,19 @@ export const CommentBase = (props: CommentBaseProps) => {
                 )
             }
 
+
+            {
+                canDelete && !isEditMode && (
+                    <Button
+                        size="sm"
+                        variant="bordered"
+                        loading={isDeleting}
+                        onClick={removeComment}
+                    >
+                        Удалить
+                    </Button>
+                )
+            }
 
             {
                 comment.isEdited && (
