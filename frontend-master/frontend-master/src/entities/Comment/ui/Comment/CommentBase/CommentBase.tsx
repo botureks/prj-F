@@ -5,8 +5,8 @@ import { useMutation } from "@apollo/client";
 import { CommentEntity } from "src/shared/api/generated/graphql";
 
 import { UserCard } from "src/shared/ui/Cards/UserCard";
-import { Textarea } from "src/shared/ui/Textarea";
 import { Button } from "src/shared/ui/Button";
+import { Textarea } from "src/shared/ui/Textarea";
 
 import UPDATE_COMMENT from "src/entities/Comment/api/gql/update-comment.model";
 
@@ -14,10 +14,12 @@ import { getAuth } from "src/entities/Auth/model/selectors/getAuth/getAuth";
 
 import cls from "./CommentBase.module.less";
 
+
 interface CommentBaseProps {
     comment: CommentEntity;
     refetchComments: () => void;
 }
+
 
 export const CommentBase = (props: CommentBaseProps) => {
     const {
@@ -25,13 +27,21 @@ export const CommentBase = (props: CommentBaseProps) => {
         refetchComments
     } = props;
 
+
     const auth = useSelector(getAuth);
+
 
     const [isEditMode, setIsEditMode] = useState(false);
 
-    const [text, setText] = useState(comment.content);
+    const [text, setText] = useState(
+        comment.content.replace(/<br\/>/g, "\n")
+    );
 
-    const [updateComment, { loading }] = useMutation(UPDATE_COMMENT);
+
+    const [updateComment, { loading }] = useMutation(
+        UPDATE_COMMENT
+    );
+
 
     const isAuthor = auth.user?.id === comment.author.id;
 
@@ -51,7 +61,12 @@ export const CommentBase = (props: CommentBaseProps) => {
             return;
         }
 
-        const formattedText = text.replace(/\n/g, "<br/>");
+
+        const formattedText = text.replace(
+            /\n/g,
+            "<br/>"
+        );
+
 
         await updateComment({
             variables: {
@@ -60,6 +75,7 @@ export const CommentBase = (props: CommentBaseProps) => {
             }
         });
 
+
         await refetchComments();
 
         setIsEditMode(false);
@@ -67,18 +83,23 @@ export const CommentBase = (props: CommentBaseProps) => {
 
 
     const cancelEdit = () => {
-        setText(comment.content);
+        setText(
+            comment.content.replace(/<br\/>/g, "\n")
+        );
+
         setIsEditMode(false);
     };
 
 
     return (
         <div className={cls.CommentBase}>
+
             <UserCard
                 user={comment.author}
                 time={comment.createdAt}
                 size="sm"
             />
+
 
             {
                 isAuthor && !isEditMode && (
@@ -108,8 +129,8 @@ export const CommentBase = (props: CommentBaseProps) => {
 
                                 <Button
                                     size="sm"
-                                    onClick={cancelEdit}
                                     disabled={loading}
+                                    onClick={cancelEdit}
                                 >
                                     Отмена
                                 </Button>
@@ -122,6 +143,16 @@ export const CommentBase = (props: CommentBaseProps) => {
                     </div>
                 )
             }
+
+
+            {
+                comment.isEdited && (
+                    <span>
+                        изменено
+                    </span>
+                )
+            }
+
         </div>
     );
 };
