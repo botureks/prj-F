@@ -1,5 +1,11 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { IsOptional, Length } from 'class-validator';
+import {
+  IsArray,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length
+} from 'class-validator';
 
 @InputType()
 export class UpdatePostInput {
@@ -13,4 +19,10 @@ export class UpdatePostInput {
   @IsOptional()
   @IsString()
   content?: string;
+
+  @Field(() => [String], { nullable: true })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  tagIds?: string[];
 }

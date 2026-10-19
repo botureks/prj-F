@@ -69,7 +69,17 @@ export class PostsService {
       throw new ForbiddenException();
     }
 
-    this.postRepository.assign(post, updatePostDto);
+    const { tagIds, ...postData } = updatePostDto;
+
+    this.postRepository.assign(post, postData);
+
+    if (tagIds !== undefined) {
+      const tags = await this.tagRepository.find({
+        id: { $in: tagIds }
+      });
+
+      post.tags = tags;
+    }
 
     post.editedAt = new Date();
     post.isEdited = true;
