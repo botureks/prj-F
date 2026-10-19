@@ -11,7 +11,7 @@ export class GqlConfigService implements GqlOptionsFactory<MercuriusDriverConfig
       path: '/api/graphql',
       routes: true,
       autoSchemaFile: './schema.gql',
-      context: (ctx: any) => ({ request: ctx.request }),
+      context: (request: any, reply: any) => ({ request, reply }),
     };
   }
 }

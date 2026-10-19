@@ -34,6 +34,10 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
+  public async validateAccessUser(id: string): Promise<UserEntity> {
+    return this.usersService.findActiveById(id);
+  }
+
   public async signIn(
     username: string,
     password: string

@@ -13,6 +13,7 @@ import { isJWT, isString } from 'class-validator';
 
 import { TokenTypeEnum } from '../../jwt/enums/token-type.enum';
 import { JwtService } from '../../jwt/jwt.service';
+import { IAccessToken } from '../../jwt/interfaces/access-token.interface';
 
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
@@ -35,56 +36,35 @@ export class AuthGuard implements CanActivate {
       context.getClass()
     ]);
 
-    if (context.getType<GqlContextType>() === 'graphql') {
-      const gqlCtx = GqlExecutionContext.create(context);
+    const request = this.getRequest(context);
+    const reply = this.getReply(context);
 
-      const args = gqlCtx.getArgByIndex(2);
-      const ctx = {
-        ...args?.req,
-        ...args?.res,
-        switchToHttp() {
-          const getRequest = () => {
-            return args?.req;
-          };
-          const getResponse = () => {
-            return args?.res;
-          };
+    const activate = await this.setAuthContext(request, reply, isPublic);
 
-          return { getRequest, getResponse };
-        }
-      };
-
-      const activate = await this.setHttpHeader(
-        ctx.switchToHttp().getRequest(),
-        gqlCtx.getContext().reply,
-        isPublic
-      );
-
-      if (!activate) {
-        throw new UnauthorizedException();
-      }
-
-      return activate;
+    if (!activate) {
+      throw new UnauthorizedException();
     }
 
-    if (context.getType() === 'http') {
-      const activate = await this.setHttpHeader(
-        context.switchToHttp().getRequest<FastifyRequest>(),
-        context.switchToHttp().getResponse(),
-        isPublic
-      );
-
-      if (!activate) {
-        throw new UnauthorizedException();
-      }
-
-      return activate;
-    }
-
-    return false;
+    return activate;
   }
 
-  private async setHttpHeader(
+  private getRequest(context: ExecutionContext): FastifyRequest {
+    if (context.getType<GqlContextType>() === 'graphql') {
+      return GqlExecutionContext.create(context).getContext().request;
+    }
+
+    return context.switchToHttp().getRequest<FastifyRequest>();
+  }
+
+  private getReply(context: ExecutionContext): FastifyReply {
+    if (context.getType<GqlContextType>() === 'graphql') {
+      return GqlExecutionContext.create(context).getContext().reply;
+    }
+
+    return context.switchToHttp().getResponse<FastifyReply>();
+  }
+
+  private async setAuthContext(
     req: FastifyRequest,
     reply: FastifyReply,
     isPublic: boolean
@@ -111,16 +91,18 @@ export class AuthGuard implements CanActivate {
         );
 
         AuthResolver.saveTokens(reply, result.accessToken, result.refreshToken);
-
         sessionCookie = result.accessToken;
       }
 
-      const { id } = await this.jwtService.verifyToken(
+      const { id } = await this.jwtService.verifyToken<IAccessToken>(
         sessionCookie,
         TokenTypeEnum.ACCESS
       );
+      const user = await this.authService.validateAccessUser(id);
 
-      req.user = id;
+      req.user = user.id;
+      req.userRole = user.role;
+
       return true;
     } catch (e) {
       console.error(e);

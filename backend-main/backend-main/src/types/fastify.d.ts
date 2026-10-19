@@ -1,8 +1,10 @@
+import type { UserRole } from '../users/enums/user-role.enum';
 import { FastifyReply, FastifyRequest as Request } from 'fastify';
 
 declare module 'fastify' {
   interface FastifyRequest extends Request {
     user?: string;
+    userRole?: UserRole;
     sessionId?: string;
     cookies: [];
     multipart(handler: any, onEnd: any);
