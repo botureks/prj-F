@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
+import { useSelector } from "react-redux";
 
 import GET_TAGS from "src/entities/Tag/api/gql/get-tags.model";
 import CREATE_TAG from "src/entities/Tag/api/gql/create-tag.model";
@@ -10,6 +11,8 @@ import { TagBadge } from "src/entities/Tag/ui/TagBadge";
 import { TagModel } from "src/entities/Tag/model/types/tag";
 import { Input } from "src/shared/ui/Input";
 import { useToast } from "src/shared/lib/hooks/useToast";
+import { getAuth } from "src/entities/Auth/model/selectors/getAuth";
+import { UserRole } from "src/entities/User/model/types/user";
 
 import cls from "./TagPicker.module.less";
 
@@ -27,6 +30,8 @@ const normalizeColor = (value: string): string | null => {
 
 export const TagPicker = ({ selectedIds, onChange }: TagPickerProps) => {
     const toast = useToast();
+    const auth = useSelector(getAuth);
+    const isAdmin = auth.user.role === UserRole.ADMIN;
 
     const { data, loading, error } = useQuery(GET_TAGS);
     const [createTag, { loading: isCreating }] = useMutation(CREATE_TAG);
@@ -166,13 +171,15 @@ export const TagPicker = ({ selectedIds, onChange }: TagPickerProps) => {
                     <span>Можно выбрать несколько</span>
                 </div>
 
-                <button
-                    type="button"
-                    className={cls.TagPickerManageButton}
-                    onClick={() => setIsManaging((value) => !value)}
-                >
-                    {isManaging ? "Скрыть управление" : "Управление тегами"}
-                </button>
+                {isAdmin && (
+                    <button
+                        type="button"
+                        className={cls.TagPickerManageButton}
+                        onClick={() => setIsManaging((value) => !value)}
+                    >
+                        {isManaging ? "Скрыть управление" : "Управление тегами"}
+                    </button>
+                )}
             </div>
 
             {loading && <span className={cls.TagPickerHint}>Загрузка тегов…</span>}
@@ -202,7 +209,7 @@ export const TagPicker = ({ selectedIds, onChange }: TagPickerProps) => {
                 </div>
             )}
 
-            {isManaging && (
+            {isAdmin && isManaging && (
                 <div className={cls.TagPickerManager}>
                     <div className={cls.TagPickerForm}>
                         <Input
