@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
 
 import { Post } from "src/entities/Post/ui/Post";
@@ -7,6 +8,8 @@ import { Border } from "src/shared/ui/Border";
 
 import { CommentArea } from "src/features/sendComment/ui/CommentArea";
 import { CommentsSection } from "src/entities/Comment/ui/CommentsSection";
+
+import { EditorModal } from "src/features/createPost/ui/EditorModal";
 
 import { getAuth } from "src/entities/Auth/model/selectors/getAuth/getAuth";
 
@@ -21,7 +24,10 @@ export const PostLayout = (props: PostLayoutProps) => {
     const { post } = props;
 
     const auth = useSelector(getAuth);
-    const isAuthor = auth.user.id === post.author.id;
+
+    const [isEditModalOpen, setEditModalOpen] = useState(false);
+
+    const isAuthor = auth.user?.id === post.author.id;
 
     return (
         <div className="container">
@@ -33,7 +39,9 @@ export const PostLayout = (props: PostLayoutProps) => {
                 />
 
                 {isAuthor && (
-                    <button>
+                    <button
+                        onClick={() => setEditModalOpen(true)}
+                    >
                         Редактировать
                     </button>
                 )}
@@ -50,9 +58,18 @@ export const PostLayout = (props: PostLayoutProps) => {
                     </a>
 
                     <CommentArea postId={post.id} />
+
                     <CommentsSection postId={post.id} />
                 </div>
             </div>
+
+            {isEditModalOpen && (
+                <EditorModal
+                    isOpen={isEditModalOpen}
+                    onClose={() => setEditModalOpen(false)}
+                    post={post}
+                />
+            )}
         </div>
     );
 };

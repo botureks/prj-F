@@ -10,7 +10,8 @@ import {
     EDITOR_DATA,
     EDITOR_DEFAULT,
     EDITOR_I18n,
-    EDITOR_TOOLS, TOPICS,
+    EDITOR_TOOLS,
+    TOPICS,
 } from "src/shared/const/editorjs.settings";
 
 import { Modal } from "src/shared/ui/Modal";
@@ -24,25 +25,39 @@ import { ModalProps } from "src/shared/ui/Modal/interfaces/ModalProps.interface"
 import { ListboxPicker } from "src/shared/ui/Listbox/ui/ListboxPicker";
 
 import CREATE_POST from "src/entities/Post/api/gql/create-post.model";
+import UPDATE_POST from "src/entities/Post/api/gql/update-post.model";
+
+import { PostEntity } from "src/shared/api/generated/graphql";
 
 import cls from "src/shared/ui/Modal/Modal.module.less";
 import editorCls from "./EditorModal.module.less";
 
 const ReactEditorJS = createReactEditorJS();
 
-export const EditorModal = (props: ModalProps) => {
-    const { isOpen, onClose } = props;
+interface EditorModalProps extends ModalProps {
+    post?: PostEntity;
+}
+
+export const EditorModal = (props: EditorModalProps) => {
+    const {
+        isOpen,
+        onClose,
+        post
+    } = props;
 
     const editorCore = useRef<EditorCore>(null);
 
     const toast = useToast();
 
-    const [topic, setTopic] = useState('');
+    const [topic, setTopic] = useState(post?.topic ?? '');
 
     const [isLoading, setLoading] = useState(false);
-    const [isPublishButtonDisabled, setIsPublishButtonDisabled] = useState(true);
+    const [isPublishButtonDisabled, setIsPublishButtonDisabled] = useState(
+        post ? false : true
+    );
 
     const [createPost] = useMutation(CREATE_POST);
+    const [updatePost] = useMutation(UPDATE_POST);
 
     const changeTopic = (topic: string) => setTopic(topic);
 
@@ -60,7 +75,7 @@ export const EditorModal = (props: ModalProps) => {
         const title = BLOCKS_TO_TITLE(data.blocks);
 
         setIsPublishButtonDisabled(title.length === 0);
-    }
+    };
 
     const handleSave = async () => {
         setLoading(true);
@@ -74,19 +89,38 @@ export const EditorModal = (props: ModalProps) => {
         const title = BLOCKS_TO_TITLE(data.blocks);
 
         try {
-            await createPost({
-                variables: {
-                    title,
-                    topic,
-                    content: JSON.stringify(data)
-                },
-            });
+            if (post) {
+                await updatePost({
+                    variables: {
+                        id: post.id,
+                        title,
+                        content: JSON.stringify(data),
+                    },
+                });
 
-            toast.success({ message: "Пост был создан" })
+                toast.success({
+                    message: "Пост был обновлён"
+                });
+            } else {
+                await createPost({
+                    variables: {
+                        title,
+                        topic,
+                        content: JSON.stringify(data)
+                    },
+                });
+
+                toast.success({
+                    message: "Пост был создан"
+                });
+            }
 
             onClose();
+
         } catch (err) {
-            toast.error({ message: 'Произошла ошибка' });
+            toast.error({
+                message: "Произошла ошибка"
+            });
         } finally {
             setLoading(false);
         }
@@ -94,8 +128,8 @@ export const EditorModal = (props: ModalProps) => {
 
     return (
         <Modal
-            isOpen={ isOpen }
-            onClose={ onClose }
+            isOpen={isOpen}
+            onClose={onClose}
             lazy
         >
             <div className={editorCls.EditorModal}>
@@ -109,17 +143,35 @@ export const EditorModal = (props: ModalProps) => {
                         </button>
                     </header>
 
-                    <div id="content-box" className={ editorCls.EditorModalContent }>
+                    <div
+                        id="content-box"
+                        className={editorCls.EditorModalContent}
+                    >
                         <div id="content">
-                            <ListboxPicker initialItems={TOPICS} onSelect={changeTopic} />
+
+                            {!post && (
+                                <ListboxPicker
+                                    initialItems={TOPICS}
+                                    onSelect={changeTopic}
+                                />
+                            )}
 
                             {/* @ts-ignore */}
                             <ReactEditorJS
                                 tools={EDITOR_TOOLS as any}
                                 defaultBlock={EDITOR_DEFAULT}
                                 i18n={EDITOR_I18n}
-                                defaultValue={EDITOR_DATA}
-                                inlineToolbar={['link', 'marker', 'bold', 'italic']}
+                                defaultValue={
+                                    post
+                                        ? JSON.parse(post.content)
+                                        : EDITOR_DATA
+                                }
+                                inlineToolbar={[
+                                    'link',
+                                    'marker',
+                                    'bold',
+                                    'italic'
+                                ]}
                                 onInitialize={handleInitialize}
                                 onChange={onChange}
                             />
@@ -131,12 +183,13 @@ export const EditorModal = (props: ModalProps) => {
                                 className={editorCls.EditorPublishBtn}
                                 disabled={isPublishButtonDisabled}
                             >
-                                Опубликовать
+                                {post ? "Сохранить" : "Опубликовать"}
                             </Button>
+
                         </div>
                     </div>
                 </div>
             </div>
         </Modal>
-    )
-}
+    );
+};
