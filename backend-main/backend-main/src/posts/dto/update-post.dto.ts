@@ -8,6 +8,10 @@ export class UpdatePostDto {
 
   @IsOptional()
   @IsString()
+  @Length(1, 32)
+  topic?: string;
 
+  @IsOptional()
+  @IsString()
   content?: string;
 }
