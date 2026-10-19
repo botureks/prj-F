@@ -5,7 +5,7 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm ci --legacy-peer-deps && npm cache clean --force
 
 # ── Stage 2: build Next.js (standalone output) ─────────────────────────────────
 FROM node:18-alpine AS builder

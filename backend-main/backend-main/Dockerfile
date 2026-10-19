@@ -5,7 +5,7 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm ci --legacy-peer-deps
 
 # ── Stage 2: compile TypeScript ────────────────────────────────────────────────
 FROM node:18-alpine AS builder
@@ -18,14 +18,12 @@ RUN ./node_modules/.bin/nest build
 # ── Stage 3: production image ──────────────────────────────────────────────────
 FROM node:18-alpine AS production
 
-RUN apk add --no-cache openssl python3 make g++ //RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
-
-RUN apk del python3 make g++
+RUN npm ci --omit=dev --legacy-peer-deps && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 
