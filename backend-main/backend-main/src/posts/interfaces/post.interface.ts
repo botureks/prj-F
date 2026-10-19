@@ -8,4 +8,6 @@ export interface IPost {
   content: string;
   createdAt: Date;
   updatedAt: Date;
+  editedAt?: Date;
+  isEdited: boolean;
 }

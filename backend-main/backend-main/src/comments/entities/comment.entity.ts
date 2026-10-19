@@ -53,4 +53,12 @@ export class CommentEntity implements IComment {
   @Field()
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
+
+  @Field({ nullable: true })
+  @Property({ nullable: true })
+  editedAt?: Date;
+
+  @Field()
+  @Property({ default: false })
+  isEdited: boolean = false;
 }

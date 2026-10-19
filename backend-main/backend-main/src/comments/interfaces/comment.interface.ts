@@ -9,4 +9,6 @@ export interface IComment {
   views: number;
   createdAt: Date;
   updatedAt: Date;
+  editedAt?: Date;
+  isEdited: boolean;
 }

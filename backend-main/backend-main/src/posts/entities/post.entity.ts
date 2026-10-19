@@ -40,4 +40,12 @@ export class PostEntity implements IPost {
   @Field()
   @Property({ onUpdate: () => new Date() })
   public updatedAt: Date = new Date();
+
+  @Field({ nullable: true })
+  @Property({ nullable: true })
+  public editedAt?: Date;
+
+  @Field()
+  @Property({ default: false })
+  public isEdited: boolean = false;
 }
