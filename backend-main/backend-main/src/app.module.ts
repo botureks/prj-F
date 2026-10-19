@@ -19,6 +19,7 @@ import { GqlConfigService } from './config/graphql.config';
 import { CacheConfig } from './config/cache.config';
 
 import { AuthGuard } from './auth/guards/auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 import { AuthService } from './auth/auth.service';
 
 import { PostsModule } from './posts/posts.module';
@@ -59,6 +60,10 @@ import { TagsModule } from './tags/tags.module';
     {
       provide: APP_GUARD,
       useClass: AuthGuard
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard
     }
   ]
 })
