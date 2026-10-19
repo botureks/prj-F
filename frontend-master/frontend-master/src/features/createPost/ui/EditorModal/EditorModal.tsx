@@ -26,6 +26,7 @@ import { ListboxPicker } from "src/shared/ui/Listbox/ui/ListboxPicker";
 
 import CREATE_POST from "src/entities/Post/api/gql/create-post.model";
 import UPDATE_POST from "src/entities/Post/api/gql/update-post.model";
+import GET_POST from "src/entities/Post/api/gql/get-post.model";
 
 import { PostEntity } from "src/shared/api/generated/graphql";
 
@@ -49,9 +50,10 @@ export const EditorModal = (props: EditorModalProps) => {
 
     const toast = useToast();
 
-    const [topic, setTopic] = useState(post?.topic ?? '');
+    const [topic, setTopic] = useState(post?.topic ?? "");
 
     const [isLoading, setLoading] = useState(false);
+
     const [isPublishButtonDisabled, setIsPublishButtonDisabled] = useState(
         post ? false : true
     );
@@ -96,6 +98,14 @@ export const EditorModal = (props: EditorModalProps) => {
                         title,
                         content: JSON.stringify(data),
                     },
+                    refetchQueries: [
+                        {
+                            query: GET_POST,
+                            variables: {
+                                id: post.id
+                            }
+                        }
+                    ]
                 });
 
                 toast.success({
@@ -167,10 +177,10 @@ export const EditorModal = (props: EditorModalProps) => {
                                         : EDITOR_DATA
                                 }
                                 inlineToolbar={[
-                                    'link',
-                                    'marker',
-                                    'bold',
-                                    'italic'
+                                    "link",
+                                    "marker",
+                                    "bold",
+                                    "italic"
                                 ]}
                                 onInitialize={handleInitialize}
                                 onChange={onChange}
