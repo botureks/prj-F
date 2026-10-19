@@ -1,11 +1,15 @@
-import { gql } from "src/shared/api/generated";
+import { gql } from "@apollo/client";
 
-const PROFILE = gql(`
+const PROFILE = gql`
     query Profile {
         profile {
-            ...UserModel
+            id
+            username
+            picture
+            role
+            isBlocked
         }
     }
-`);
+`;
 
 export default PROFILE;

@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import { AuthSchema } from "../types/authSchema";
+import { UserRole } from "src/entities/User/model/types/user";
 
 const initialState: AuthSchema = {
     isLoading: true,
     isLoggedIn: false,
-    user: { username: '', id: '' }
+    user: { username: '', id: '', role: UserRole.USER, isBlocked: false }
 };
 
 export const authSlice = createSlice({
