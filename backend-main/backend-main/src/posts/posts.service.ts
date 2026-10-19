@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityRepository } from '@mikro-orm/postgresql';
@@ -39,18 +39,30 @@ export class PostsService {
 
   async updatePost(
     id: string,
+    userId: string,
     updatePostDto: UpdatePostDto
   ): Promise<PostEntity> {
     const post = await this.postRepository.findOne(id);
 
+    // @ts-ignore
+    await this.postRepository.populate(post, ['author']);
+
+    if (post.author.id !== userId) {
+      throw new ForbiddenException();
+    }
+
     this.postRepository.assign(post, updatePostDto);
+
+    post.editedAt = new Date();
+    post.isEdited = true;
+
     await this.postRepository.getEntityManager().flush();
 
     return post;
   }
 
   async deletePost(id: string): Promise<void> {
-    const post = this.postRepository.findOne({ id });
+    const post = await this.postRepository.findOne({ id });
     if (!post) {
       return;
     }
@@ -76,6 +88,8 @@ export class PostsService {
       // @ts-ignore
       await this.postRepository.populate(post, ['author.username']);
     }
+
+    console.log('Posts in DB:', posts);
 
     return posts.reverse();
   }

@@ -37,8 +37,9 @@ export class PostsResolver {
   async updatePost(
     @Args('id') id: string,
     @Args('updatePostInput') updatePostInput: UpdatePostInput,
+    @CurrentUser() userId: string
   ): Promise<PostEntity> {
-    return this.postsService.updatePost(id, updatePostInput);
+    return this.postsService.updatePost(id, userId, updatePostInput);
   }
 
   @Mutation(() => Boolean)
