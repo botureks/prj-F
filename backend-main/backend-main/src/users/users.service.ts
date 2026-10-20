@@ -63,6 +63,30 @@ export class UsersService {
     return user;
   }
 
+  public async findProfileById(id: string): Promise<UserEntity> {
+    const user = await this.usersRepository.findOne({ id });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  public async updateMyDescription(
+    userId: string,
+    description?: string | null
+  ): Promise<UserEntity> {
+    const user = await this.findOneById(userId);
+    const normalizedDescription = description?.trim();
+
+    user.description = normalizedDescription || null;
+
+    await this.commonService.saveEntity(this.usersRepository, user);
+
+    return user;
+  }
+
   public async findActiveById(id: string): Promise<UserEntity> {
     const user = await this.findOneById(id);
     this.throwIfBlocked(user);

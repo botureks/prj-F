@@ -5,6 +5,7 @@ export interface IUser {
   id: string;
   username: string;
   password: string;
+  description?: string | null;
   role: UserRole;
   isBlocked: boolean;
   credentials: ICredentials;

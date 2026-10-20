@@ -41,6 +41,13 @@ export class UserEntity implements IUser {
   @MaxLength(250)
   public picture?: string;
 
+  @Field(() => String, { nullable: true })
+  @Property({ columnType: 'varchar', length: 300, nullable: true })
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  public description?: string | null;
+
   @Field(() => UserRole)
   @Property({ columnType: 'varchar', length: 16, default: UserRole.USER })
   @IsEnum(UserRole)
@@ -54,6 +61,7 @@ export class UserEntity implements IUser {
   @Embedded(() => CredentialsEmbeddable)
   public credentials: CredentialsEmbeddable = new CredentialsEmbeddable();
 
+  @Field()
   @Property({ onCreate: () => new Date() })
   public createdAt: Date = new Date();
 

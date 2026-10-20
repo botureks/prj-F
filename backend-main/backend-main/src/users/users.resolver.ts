@@ -5,8 +5,10 @@ import { GraphQLUpload } from 'graphql-upload-minimal';
 import { UserEntity } from './entities/user.entity';
 import { UsersService } from './users.service';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from './enums/user-role.enum';
+import { UserProfileType } from './types/user-profile.type';
 import { IFileData } from '../storage/intefaces/FileData.Interface';
 
 @Resolver(() => UserEntity)
@@ -16,6 +18,21 @@ export class UsersResolver {
   @Query(() => UserEntity)
   public async profile(@CurrentUser() userId: string): Promise<UserEntity> {
     return await this.usersService.findOneById(userId);
+  }
+
+  @Public()
+  @Query(() => UserProfileType)
+  public async userProfile(@Args('id') id: string): Promise<UserProfileType> {
+    return this.usersService.findProfileById(id);
+  }
+
+  @Mutation(() => UserProfileType)
+  public async updateMyDescription(
+    @CurrentUser() userId: string,
+    @Args('description', { type: () => String, nullable: true })
+    description?: string | null
+  ): Promise<UserProfileType> {
+    return this.usersService.updateMyDescription(userId, description);
   }
 
   @Roles(UserRole.ADMIN)
