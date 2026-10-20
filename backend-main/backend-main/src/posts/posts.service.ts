@@ -142,4 +142,13 @@ export class PostsService {
 
     return posts.reverse();
   }
+
+  public async getPostsByUser(userId: string): Promise<PostEntity[]> {
+    const posts = await this.postRepository.find(
+      { author: userId },
+      { populate: ['author', 'tags'] }
+    );
+
+    return posts.reverse();
+  }
 }

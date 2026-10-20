@@ -20,6 +20,12 @@ export class PostsResolver {
   }
 
   @Public()
+  @Query(() => [PostEntity])
+  async postsByUser(@Args('userId') userId: string): Promise<PostEntity[]> {
+    return this.postsService.getPostsByUser(userId);
+  }
+
+  @Public()
   @Query(() => PostEntity, { nullable: true })
   async post(@Args('id') id: string): Promise<PostEntity | null> {
     return this.postsService.getPostById(id);
