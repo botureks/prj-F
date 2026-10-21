@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@apollo/client";
+import { useRouter } from "next/router";
 
 import GET_USERS from "src/entities/User/api/gql/get-users.model";
 import BLOCK_USER from "src/entities/User/api/gql/block-user.model";
@@ -16,6 +17,7 @@ interface UsersQueryData {
 
 export const AdminUsers = () => {
     const toast = useToast();
+    const router = useRouter();
     const { data, loading, error, refetch } = useQuery<UsersQueryData>(GET_USERS);
     const [blockUser, { loading: isBlocking }] = useMutation(BLOCK_USER);
     const [unblockUser, { loading: isUnblocking }] = useMutation(UNBLOCK_USER);
@@ -50,7 +52,10 @@ export const AdminUsers = () => {
             <div className={cls.AdminUsersList}>
                 {(data?.users ?? []).map((user) => (
                     <div className={cls.AdminUsersRow} key={user.id}>
-                        <div>
+                        <div
+                            className={cls.AdminUsersProfile}
+                            onClick={() => router.push(`/profile/${user.id}`)}
+                        >
                             <strong>{user.username}</strong>
                             <span>{user.role === UserRole.ADMIN ? "Администратор" : "Пользователь"}</span>
                             {user.isBlocked && <span>Заблокирован</span>}

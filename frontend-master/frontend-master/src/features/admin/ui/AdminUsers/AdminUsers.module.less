@@ -22,10 +22,17 @@
 
   border: 1px solid var(--border-color);
   border-radius: 12px;
+}
 
-  > div {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+.AdminUsersProfile {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+
+  cursor: pointer;
+}
+
+.AdminUsersProfile:hover strong {
+  text-decoration: underline;
 }
