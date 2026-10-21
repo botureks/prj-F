@@ -1,4 +1,5 @@
 import { FC, ReactNode } from "react";
+import { useRouter } from "next/router";
 
 import { classNames } from "src/shared/lib/classNames";
 import { formatDate } from "src/shared/lib/utils";
@@ -26,13 +27,20 @@ export const UserCard: FC<UserCardProps> = (props: UserCardProps) => {
         children
     } = props;
 
+    const router = useRouter();
+    const openProfile = () => void router.push(`/profile/${user.id}`);
+
     return (
         <>
             <div className={classNames(cls.UserCard, undefined, [cls[size]])}>
-                <Avatar src={ user.picture || "" } size="sm" />
+                <span className={cls.UserCardAvatarLink} onClick={openProfile}>
+                    <Avatar src={ user.picture || "" } size="sm" />
+                </span>
 
                 <div className={ cls.UserCardData }>
-                    <span>{user.username}</span>
+                    <span className={cls.UserCardUsername} onClick={openProfile}>
+                        {user.username}
+                    </span>
                     {time && (
                         <time dateTime={new Date(time).toDateString()}>
                             {formatDate(time)}

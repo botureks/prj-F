@@ -92,6 +92,10 @@ export const Header = () => {
                                     </ListboxTrigger>
                                     <ListboxItems>
                                         <UserCardWithUpload user={ auth.user }/>
+                                        <ListboxItem
+                                            title="Мой профиль"
+                                            onClick={() => router.push(`/profile/${auth.user.id}`)}
+                                        />
                                         <Switch
                                             label="Тема"
                                             size="sm"
