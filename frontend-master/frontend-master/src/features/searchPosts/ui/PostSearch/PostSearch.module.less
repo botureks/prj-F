@@ -1,0 +1,71 @@
+.PostSearch {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding-top: 16px;
+}
+
+.SearchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.SearchRow > input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.TagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.TagButton {
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+
+  background: transparent;
+  cursor: pointer;
+
+  transition: box-shadow linear .1s, transform linear .1s;
+}
+
+.TagButton:hover {
+  transform: translateY(-1px);
+}
+
+.TagButtonSelected {
+  box-shadow: 0 0 0 2px #418AF4;
+}
+
+.TagsMessage {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.ResetButton {
+  width: fit-content;
+  padding: 0;
+  border: 0;
+
+  background: transparent;
+  color: #418AF4;
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.ResetButton:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .SearchRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
