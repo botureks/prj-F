@@ -15,8 +15,11 @@ export class PostsResolver {
 
   @Public()
   @Query(() => [PostEntity])
-  async posts(): Promise<PostEntity[]> {
-    return this.postsService.getAllPosts();
+  async posts(
+    @Args('search', { type: () => String, nullable: true }) search?: string,
+    @Args('tagIds', { type: () => [String], nullable: true }) tagIds?: string[]
+  ): Promise<PostEntity[]> {
+    return this.postsService.getAllPosts(search, tagIds);
   }
 
   @Public()

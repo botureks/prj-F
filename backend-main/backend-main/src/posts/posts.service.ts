@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 
 import { InjectRepository } from '@mikro-orm/nestjs';
+import { FilterQuery } from '@mikro-orm/core';
 import { EntityRepository } from '@mikro-orm/postgresql';
 
 import { v4 } from 'uuid';
@@ -135,8 +136,32 @@ export class PostsService {
     });
   }
 
-  public async getAllPosts(): Promise<PostEntity[]> {
-    const posts = await this.postRepository.findAll({
+  public async getAllPosts(
+    search?: string,
+    tagIds?: string[]
+  ): Promise<PostEntity[]> {
+    const where: FilterQuery<PostEntity> = {};
+    const normalizedSearch = search?.trim();
+
+    if (normalizedSearch) {
+      const pattern = `%${normalizedSearch}%`;
+
+      where.$or = [
+        { title: { $ilike: pattern } },
+        { topic: { $ilike: pattern } },
+        { content: { $ilike: pattern } }
+      ];
+    }
+
+    const uniqueTagIds = [...new Set(tagIds ?? [])];
+
+    if (uniqueTagIds.length) {
+      where.tags = {
+        id: { $in: uniqueTagIds }
+      };
+    }
+
+    const posts = await this.postRepository.find(where, {
       populate: ['author', 'tags']
     });
 
