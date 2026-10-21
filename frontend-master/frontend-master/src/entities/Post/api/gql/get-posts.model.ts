@@ -4,8 +4,8 @@ import POST_MODEL from "./fragments/post.fragment";
 
 const GET_POSTS = gql`
     ${POST_MODEL}
-    query Posts {
-        posts {
+    query Posts($search: String, $tagIds: [String!]) {
+        posts(search: $search, tagIds: $tagIds) {
             ...PostModel
         }
     }
