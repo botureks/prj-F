@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { createReactEditorJS } from "react-editor-js";
 import { EditorCore } from "@react-editor-js/core";
@@ -29,6 +29,10 @@ import { PostModel } from "src/entities/Post/model/types/post";
 
 import { TagPicker } from "src/features/manageTags/ui/TagPicker";
 
+import UPLOAD_CONTENT_IMAGE from "src/shared/api/gql/upload-content-image.model";
+import { UploadedImageTool } from "src/shared/lib/editorjs/uploaded-image.tool";
+
+
 import cls from "src/shared/ui/Modal/Modal.module.less";
 import editorCls from "./EditorModal.module.less";
 
@@ -51,6 +55,29 @@ export const EditorModal = ({ isOpen, onClose, post }: EditorModalProps) => {
 
     const [createPost] = useMutation(CREATE_POST);
     const [updatePost] = useMutation(UPDATE_POST);
+    const [uploadContentImage] = useMutation(UPLOAD_CONTENT_IMAGE);
+
+    const editorTools = useMemo(() => ({
+        ...EDITOR_TOOLS,
+        image: {
+            class: UploadedImageTool,
+            config: {
+                upload: async (file: File) => {
+                    const { data } = await uploadContentImage({
+                        variables: { file }
+                    });
+
+                    const url = data?.uploadContentImage;
+
+                    if (typeof url !== "string" || !url) {
+                        throw new Error("Image upload failed");
+                    }
+
+                    return url;
+                }
+            }
+        }
+    }), [uploadContentImage]);
 
     const handleInitialize = useCallback((instance: EditorCore) => {
         editorCore.current = instance;
@@ -148,7 +175,7 @@ export const EditorModal = ({ isOpen, onClose, post }: EditorModalProps) => {
 
                             {/* @ts-ignore */}
                             <ReactEditorJS
-                                tools={EDITOR_TOOLS as any}
+                                tools={editorTools as any}
                                 defaultBlock={EDITOR_DEFAULT}
                                 i18n={EDITOR_I18n}
                                 defaultValue={post ? JSON.parse(post.content) : EDITOR_DATA}
