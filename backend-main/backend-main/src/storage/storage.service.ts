@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { FastifyRequest } from 'fastify';
 
 import sharp from 'sharp';
+import { v4 } from 'uuid';
 
 import createClient from './client/minioClient';
 
@@ -156,6 +157,41 @@ export class StorageService {
     } catch (e) {
       console.error(e);
       return '';
+    }
+  }
+
+  async uploadContentImage(file: IFileData): Promise<string> {
+    if (!file?.mimetype?.match(/^image\//)) {
+      throw new BadRequestException('Можно загружать только изображения');
+    }
+
+    const settings = this.configService.get('storage') as IStorage;
+    const s3Stream = createClient(settings);
+    const filename = `content/${v4()}.webp`;
+
+    try {
+      const response = await s3Stream
+        .upload({
+          Bucket: 'avatars',
+          Key: filename,
+          Body: file.createReadStream().pipe(
+            sharp()
+              .rotate()
+              .resize({
+                width: 1600,
+                height: 1600,
+                fit: 'inside',
+                withoutEnlargement: true
+              })
+              .webp({ quality: 85 })
+          )
+        })
+        .promise();
+
+      return response.Location.replace(settings.endpoint, settings.publicEndpoint);
+    } catch (error) {
+      console.error(error);
+      throw new BadRequestException('Не удалось загрузить изображение');
     }
   }
 
