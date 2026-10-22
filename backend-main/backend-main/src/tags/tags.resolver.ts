@@ -9,17 +9,20 @@ import { UpdateTagInput } from './dto/update-tag.input';
 
 import { ITag } from './interfaces/tag.interface';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { UserRole } from '../users/enums/user-role.enum';
 
 @Resolver(() => TagEntity)
 export class TagsResolver {
   constructor(private readonly tagsService: TagsService) {}
 
+  @Public()
   @Query(() => [TagEntity])
   public async tags(): Promise<ITag[]> {
     return this.tagsService.getAllTags();
   }
 
+  @Public()
   @Query(() => TagEntity, { nullable: true })
   public async tag(
     @Args('id') id: string
